@@ -1,0 +1,12 @@
+Package: akfingapdata
+Type: Package
+Title: API Access to GAP Product Tables From The AKFIN Database
+Version: 0.1.0
+Author: Matt Callahan
+Maintainer: The package maintainer <matt.callahan@noaa.gov>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports: magrittr, httr, dplyr
