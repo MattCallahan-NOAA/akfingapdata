@@ -23,9 +23,5 @@ get_gap_biomass<-function(survey_definition_id=98, area_id=1, species_code=21740
     type = "application/json") %>%
     # convert to data frame
     dplyr::bind_rows() %>%
-  dplyr::rename_with(tolower)
+    dplyr::rename_with(tolower)
 }
-
-
-
-
