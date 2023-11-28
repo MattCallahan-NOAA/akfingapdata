@@ -10,7 +10,7 @@
 #' @param startyear first year in the time series, default 1990.
 #' @param endyear last year in the time series, default to latest year,
 
-get_gap_biomass<-function(survey_definition_id=47, area_id=40, species_code=21010, start_year=1990, end_year=3000) {
+get_gap_biomass<-function(survey_definition_id=98, area_id=1, species_code=21740, start_year=1990, end_year=3000) {
   # paste(... collapse=",") puts commas between vector elements
   area_id <- paste(area_id, collapse = ",")
   species_code <- paste(species_code, collapse = ",")
