@@ -11,17 +11,37 @@
 #' @param endyear last year in the time series, default to latest year,
 
 get_gap_biomass<-function(survey_definition_id=98, area_id=1, species_code=21740, start_year=1990, end_year=3000) {
+
+  # Secret string text file needs to be in your working R directory
+  secret <- jsonlite::base64_enc( readChar("Callahan_token.txt",nchars=1e6) )
+
+  # Get token from API
+  req <- httr::POST("https://apex.psmfc.org/akfin/data_marts/oauth/token",
+                    httr::add_headers(
+                      "Authorization" = paste("Basic", gsub("\n", "", secret)),
+                      "Content-Type" = "application/x-www-form-urlencoded;charset=UTF-8"
+                    ),
+                    body = "grant_type=client_credentials"
+  );
+
+  #  Create authentication error message
+  httr::stop_for_status(req, "Something broke.")
+  token <- paste("Bearer", httr::content(req)$access_token)
+
   # paste(... collapse=",") puts commas between vector elements
   area_id <- paste(area_id, collapse = ",")
   species_code <- paste(species_code, collapse = ",")
   survey_definition_id<-paste(survey_definition_id, collapse = ",")
   query <- list(survey_definition_id<-survey_definition_id, area_id=area_id, species_code=species_code, start_year=start_year, end_year=end_year)
-  url <- "https://apex.psmfc.org/akfin/data_marts/akmp/gap_biomass?"
+  url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_biomass?"
 
   httr::content(
-    httr::GET(url=url, query=query),
+    httr::GET(url=url, query=query,
+              add_headers(Authorization = token)),
     type = "application/json") %>%
     # convert to data frame
     dplyr::bind_rows() %>%
     dplyr::rename_with(tolower)
 }
+
+
