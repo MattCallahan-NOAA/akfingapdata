@@ -1,3 +1,32 @@
+--gap_agecomp
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_agecomp
+where area_id in nvl(:area_id,1)
+and species_code in nvl(:species_code, 21740)
+and survey_definition_id in nvl(:survey_definition_id,98)
+and year between nvl(:start_year, 1990)and nvl(:end_year, 3000) 
+;
+         :ret := l_cur;
+
+end;
+
+-- gap_area
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_area
+;
+         :ret := l_cur;
+
+end;
+
+
 --gap_biomass
 declare  
   l_cur  sys_refcursor;
@@ -28,23 +57,106 @@ declare
 begin 
 metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
   open l_cur for  
- select * from gap_products.akfin_catch; 
+ select * from gap_products.akfin_catch
+ --where species_code in (select * from table(apex_string.split(nvl(:species_code,species_code),',')));
+ where species_code in nvl(:species_code, 21740);
          :ret := l_cur;  --oracle takes care of, don't bother me. This requires ret output parameter.
 end;
 
-
--- gap_area
+--gap_cpue
 declare  
   l_cur  sys_refcursor;
 begin
 metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
 open l_cur for 
-select * from gap_products.akfin_area
+select * from gap_products.akfin_cpue
+where species_code in nvl(:species_code, 21740)
 ;
          :ret := l_cur;
 
 end;
---
+
+
+--gap_cruises
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_cruises
+where survey_definition_id in nvl(:survey_definition_id,98)
+and year between nvl(:start_year, 1990)and nvl(:end_year, 3000) 
+;
+         :ret := l_cur;
+
+end;
+
+--gap_haul
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_haul
+;
+         :ret := l_cur;
+
+end;
+
+--gap_lengths
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_lengths
+where species_code in nvl(:species_code, 21740)
+;
+         :ret := l_cur;
+
+end;
+
+--gap_metadata_column
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_metadata_column
+;
+         :ret := l_cur;
+
+end;
+
+--gap_sizecomp
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_sizecomp
+where area_id in nvl(:area_id,1)
+and species_code in nvl(:species_code, 21740)
+and survey_definition_id in nvl(:survey_definition_id,98)
+and year between nvl(:start_year, 1990)and nvl(:end_year, 3000) 
+;
+         :ret := l_cur;
+
+end;
+
+--gap_specimen
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_specimen
+where species_code in nvl(:species_code, 21740)
+and region in nvl(:region, 'BS') 
+;
+         :ret := l_cur;
+
+end;
 
 --gap_taxonomics
 declare  
@@ -57,3 +169,4 @@ select * from gap_products.akfin_taxonomics_worms
          :ret := l_cur;
 
 end;
+

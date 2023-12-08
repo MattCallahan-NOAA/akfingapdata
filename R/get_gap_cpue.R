@@ -1,11 +1,11 @@
-#' get_gap_catch
-#' @description This is a test function that downloads the catch table by species
+#' get_gap_cpue
+#' @description This is a test function that downloads the cpue table by species
 
 #' @param species RACE species code for which biomass is calculated.
 
-get_gap_catch<-function(species_code) {
+get_gap_cpue<-function(species_code) {
 
-  url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_catch?"
+  url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_cpue?"
 
   species_code <- paste(species_code, collapse = ",")
   query <- list(species_code=species_code)
@@ -20,10 +20,10 @@ get_gap_catch<-function(species_code) {
 
 }
 
- # 4.4 minutes
- # Start<-Sys.time()
- # test<-get_gap_catch(species_code=21740)
- # End<-Sys.time()
- # End-Start
- #
+# 4.4 minutes
+# Start<-Sys.time()
+# test<-get_gap_cpue(species_code=c(21740,21520))
+# End<-Sys.time()
+# End-Start
+#
 

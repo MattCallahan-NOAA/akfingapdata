@@ -5,22 +5,6 @@
 
 
 get_gap_species<-function() {
-  # Secret string text file needs to be in your working R directory
-  secret <- jsonlite::base64_enc( readChar("Callahan_token.txt",nchars=1e6) )
-
-  # Get token from API
-  req <- httr::POST("https://apex.psmfc.org/akfin/data_marts/oauth/token",
-                    httr::add_headers(
-                      "Authorization" = paste("Basic", gsub("\n", "", secret)),
-                      "Content-Type" = "application/x-www-form-urlencoded;charset=UTF-8"
-                    ),
-                    body = "grant_type=client_credentials"
-  );
-
-  #  Create authentication error message
-  httr::stop_for_status(req, "Something broke.")
-  token <- paste("Bearer", httr::content(req)$access_token)
-
   url <- "https://apex.psmfc.org/akfin/data_marts/akmp/gap_taxonomics?"
   httr::content(
     httr::GET(url=url,
