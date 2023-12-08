@@ -20,10 +20,5 @@ get_gap_cpue<-function(species_code) {
 
 }
 
-# 4.4 minutes
-# Start<-Sys.time()
-# test<-get_gap_cpue(species_code=c(21740,21520))
-# End<-Sys.time()
-# End-Start
-#
+
 

@@ -158,6 +158,41 @@ and region in nvl(:region, 'BS')
 
 end;
 
+--gap_split_fractions
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_split_fractions
+;
+         :ret := l_cur;
+
+end;
+
+--gap_stratum_groups
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_stratum_groups
+;
+         :ret := l_cur;
+
+end;
+
+--gap_survey_deign
+declare  
+  l_cur  sys_refcursor;
+begin
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+open l_cur for 
+select * from gap_products.akfin_survey_design
+;
+         :ret := l_cur;
+
+end;
 --gap_taxonomics
 declare  
   l_cur  sys_refcursor;

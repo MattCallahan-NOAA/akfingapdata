@@ -7,13 +7,13 @@
 #' @param species_code RACE species code .
 #' @param region region specimens came from: BS, HWC, WC, HG, AI, GOA, HBS
 
-get_gap_specimen<-function(species_code=21740, region="BS") {
+get_gap_specimen<-function(species_code=21740, region="GOA") {
 
   # paste(... collapse=",") puts commas between vector elements
   region<- paste(region, collapse = ",")
   species_code <- paste(species_code, collapse = ",")
   query <- list(species_code=species_code, region=region)
-  url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_specimen?"
+  url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_specimen"
 
   httr::content(
     httr::GET(url=url, query=query,
@@ -25,9 +25,3 @@ get_gap_specimen<-function(species_code=21740, region="BS") {
 }
 
 
-Start<-Sys.time()
-test<- get_gap_specimen()
-End<-Sys.time()
-End-Start
-
-token<-create_token("Callahan_token.txt")

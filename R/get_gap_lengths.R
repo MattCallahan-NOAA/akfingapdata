@@ -25,15 +25,5 @@ get_gap_lengths<-function(species_code=21740) {
 }
 
 
-# Start<-Sys.time()
-# test<- httr::content(
-#   httr::GET(url="https://apex.psmfc.org/akfin/data_marts/gap_products/gap_lengths?species_code=21470",
-#             add_headers(Authorization = token)),
-#   type = "application/json") %>%
-#   # convert to data frame
-#   dplyr::bind_rows() %>%
-#   dplyr::rename_with(tolower)
-# End<-Sys.time()
-# End-Start
-#
+
 

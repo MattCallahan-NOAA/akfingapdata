@@ -24,9 +24,4 @@ get_gap_cruises<-function(survey_definition_id=98, start_year=1990, end_year=300
     dplyr::rename_with(tolower)
 }
 
-# 4.4 minutes
-Start<-Sys.time()
-test<-get_gap_cruises()
-End<-Sys.time()
-End-Start
-#
+
