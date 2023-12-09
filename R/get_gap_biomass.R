@@ -6,9 +6,9 @@
 
 #' @param survey_definition_id character that designates regional survey. EBS-98, NBS-143, EBS slope-78, GOA-47, AI-52. Default is 47.
 #' @param area_id This is the level at which biomass is calculated. Biomass may not be comparable accross areas.
-#' @param species RACE species code for which biomass is calculated.
-#' @param startyear first year in the time series, default 1990.
-#' @param endyear last year in the time series, default to latest year,
+#' @param species_code RACE species code for which biomass is calculated.
+#' @param start_year first year in the time series, default 1990.
+#' @param end_year last year in the time series, default to latest year,
 
 get_gap_biomass<-function(survey_definition_id=98, area_id=1, species_code=21740, start_year=1990, end_year=3000) {
 

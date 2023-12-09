@@ -51,6 +51,7 @@ end;
 --parameters: area_id, start_year, end_year, species_code, survey_dfinition_id
 
 -- gap_catch
+/*
 -- parameters output
 declare  
   l_cur  sys_refcursor;    
@@ -61,19 +62,50 @@ metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_i
  --where species_code in (select * from table(apex_string.split(nvl(:species_code,species_code),',')));
  where species_code in nvl(:species_code, 21740);
          :ret := l_cur;  --oracle takes care of, don't bother me. This requires ret output parameter.
+end; */
+
+--update
+declare  
+  l_cur  sys_refcursor;    
+begin 
+metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
+  open l_cur for  
+select ca.*, h.stratum, cr.survey_definition_id, cr.year, s.area_id
+from gap_products.akfin_catch ca
+inner join gap_products.akfin_haul h on
+ca.hauljoin=h.hauljoin
+inner join gap_products.akfin_cruises cr on
+h.cruisejoin=cr.cruisejoin
+inner join gap_products.akfin_stratum_groups s on
+h.stratum=s.stratum and cr.survey_definition_id = s.survey_definition_id
+where ca.species_code in nvl(:species_code, 21740)
+and year between nvl(:start_year, 1990) and nvl(:end_year, 1990)
+and cr.survey_definition_id in nvl(:survey_definition_id, 98)
+and s.area_id in nvl(:area_id, 1)
+;
+         :ret := l_cur;  --oracle takes care of, don't bother me. This requires ret output parameter.
 end;
 
 --gap_cpue
 declare  
-  l_cur  sys_refcursor;
-begin
+  l_cur  sys_refcursor;    
+begin 
 metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
-open l_cur for 
-select * from gap_products.akfin_cpue
-where species_code in nvl(:species_code, 21740)
+  open l_cur for  
+select cp.*, h.stratum, cr.survey_definition_id, cr.year, s.area_id
+from gap_products.akfin_cpue cp
+inner join gap_products.akfin_haul h on
+cp.hauljoin=h.hauljoin
+inner join gap_products.akfin_cruises cr on
+h.cruisejoin=cr.cruisejoin
+inner join gap_products.akfin_stratum_groups s on
+h.stratum=s.stratum and cr.survey_definition_id = s.survey_definition_id
+where cp.species_code in nvl(:species_code, 21740)
+and year between nvl(:start_year, 1990) and nvl(:end_year, 1990)
+and cr.survey_definition_id in nvl(:survey_definition_id, 98)
+and s.area_id in nvl(:area_id, 1)
 ;
-         :ret := l_cur;
-
+         :ret := l_cur;  --oracle takes care of, don't bother me. This requires ret output parameter.
 end;
 
 
@@ -103,17 +135,26 @@ select * from gap_products.akfin_haul
 
 end;
 
---gap_lengths
+--gap_length
 declare  
-  l_cur  sys_refcursor;
-begin
+  l_cur  sys_refcursor;    
+begin 
 metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
-open l_cur for 
-select * from gap_products.akfin_lengths
-where species_code in nvl(:species_code, 21740)
+  open l_cur for  
+select ln.*, h.stratum, cr.survey_definition_id, cr.year, s.area_id
+from gap_products.akfin_lengths ln
+inner join gap_products.akfin_haul h on
+ln.hauljoin=h.hauljoin
+inner join gap_products.akfin_cruises cr on
+h.cruisejoin=cr.cruisejoin
+inner join gap_products.akfin_stratum_groups s on
+h.stratum=s.stratum and cr.survey_definition_id = s.survey_definition_id
+where ln.species_code in nvl(:species_code, 21740)
+and year between nvl(:start_year, 1990) and nvl(:end_year, 1990)
+and cr.survey_definition_id in nvl(:survey_definition_id, 98)
+and s.area_id in nvl(:area_id, 1)
 ;
-         :ret := l_cur;
-
+         :ret := l_cur;  --oracle takes care of, don't bother me. This requires ret output parameter.
 end;
 
 --gap_metadata_column
@@ -146,16 +187,24 @@ end;
 
 --gap_specimen
 declare  
-  l_cur  sys_refcursor;
-begin
+  l_cur  sys_refcursor;    
+begin 
 metadata.app_audit_pkg.audit_record_web_svc(p_app_user => :CURRENT_USER, p_env_id => 2); 
-open l_cur for 
-select * from gap_products.akfin_specimen
-where species_code in nvl(:species_code, 21740)
-and region in nvl(:region, 'BS') 
+  open l_cur for  
+select sp.*, h.stratum, cr.survey_definition_id, cr.year, s.area_id
+from gap_products.akfin_specimen sp
+inner join gap_products.akfin_haul h on
+sp.hauljoin=h.hauljoin
+inner join gap_products.akfin_cruises cr on
+h.cruisejoin=cr.cruisejoin
+inner join gap_products.akfin_stratum_groups s on
+h.stratum=s.stratum and cr.survey_definition_id = s.survey_definition_id
+where sp.species_code in nvl(:species_code, 21740)
+and year between nvl(:start_year, 1990) and nvl(:end_year, 1990)
+and cr.survey_definition_id in nvl(:survey_definition_id, 98)
+and s.area_id in nvl(:area_id, 1)
 ;
-         :ret := l_cur;
-
+         :ret := l_cur;  --oracle takes care of, don't bother me. This requires ret output parameter.
 end;
 
 --gap_split_fractions

@@ -1,11 +1,14 @@
 #' get_gap_lengths
 #' @description Doesn't work...
 #' This function pulls data from the akfin_agecomp table in the gap_products schema on the AKFIN database.
-#' This table is a copy of the biomass table produced by the groundfish assessment program (GAP)
 #' These data are docuented here: https://github.com/afsc-gap-products/gap_products
-#' get_gap_species() and get_gap_area() are related functions to look up species codes and area ids if necessary.
+#' get_gap_taxonomics() and get_gap_area() are related functions to look up species codes and area ids if necessary.
 
-#' @param species RACE species code for which biomass is calculated.
+#' @param survey_definition_id character that designates regional survey. EBS-98, NBS-143, EBS slope-78, GOA-47, AI-52. Default is 47.
+#' @param area_id This is the level at which biomass is calculated. Biomass may not be comparable accross areas.
+#' @param species_code RACE species code for which biomass is calculated.
+#' @param start_year first year in the time series, default 1990.
+#' @param end_year last year in the time series, default to latest year,
 
 
 get_gap_lengths<-function(species_code=21740) {
