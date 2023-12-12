@@ -17,11 +17,11 @@ get_gap_agecomp<-function(survey_definition_id=98, area_id=10, species_code=2174
   area_id <- paste(area_id, collapse = ",")
   species_code <- paste(species_code, collapse = ",")
   survey_definition_id<-paste(survey_definition_id, collapse = ",")
-  query <- list(survey_definition_id<-survey_definition_id, area_id=area_id, species_code=species_code, start_year=start_year, end_year=end_year)
+  query <- list(survey_definition_id=survey_definition_id, area_id=area_id, species_code=species_code, start_year=start_year, end_year=end_year)
   url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_agecomp?"
 
   httr::content(
-    httr::GET(url=url, #query=query,
+    httr::GET(url=url, query=query,
               add_headers(Authorization = token)),
     type = "application/json") %>%
     # convert to data frame
