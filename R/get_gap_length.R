@@ -1,4 +1,4 @@
-#' get_gap_lengths
+#' get_gap_length
 #' @description This function pulls data from the akfin_agecomp table in the gap_products schema on the AKFIN database.
 #' These data are docuented here: https://github.com/afsc-gap-products/gap_products
 #' get_gap_taxonomics() and get_gap_area() are related functions to look up species codes and area ids if necessary.
@@ -10,7 +10,7 @@
 #' @param end_year last year in the time series, default to latest year,
 
 
-get_gap_lengths<-function(survey_definition_id=98, area_id=1, species_code=21740, start_year=1990, end_year=3000) {
+get_gap_length<-function(survey_definition_id=98, area_id=1, species_code=21740, start_year=1990, end_year=3000) {
 
   # paste(... collapse=",") puts commas between vector elements
   # paste(... collapse=",") puts commas between vector elements
@@ -18,7 +18,7 @@ get_gap_lengths<-function(survey_definition_id=98, area_id=1, species_code=21740
   species_code <- paste(species_code, collapse = ",")
   survey_definition_id<-paste(survey_definition_id, collapse = ",")
   query <- list(survey_definition_id=survey_definition_id, area_id=area_id, species_code=species_code, start_year=start_year, end_year=end_year)
-  url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_lengths?"
+  url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_length?"
 
   httr::content(
     httr::GET(url=url, query=query,
