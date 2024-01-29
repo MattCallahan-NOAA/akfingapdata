@@ -59,7 +59,7 @@ these parameters, first download several lookup tables.
 
 ``` r
 # download species_code
-taxa<- get_gap_taxonomics()
+taxa<- get_gap_taxonomic_classification()
 
 # find species codes for shortraker rockfish
  taxa %>% filter(grepl("shortraker", tolower(common_name)))
@@ -192,8 +192,8 @@ head(get_gap_agecomp(survey_definition_id = 47,
 #> #   akfin_load_date <chr>
 ```
 
-Catch, CPUE, Lengh, and Specimen tables contain haul level data. The web
-service joins the haul, cruises, and stratum groups tables to allow
+Catch, CPUE, Length, and Specimen tables contain haul level data. The
+web service joins the haul, cruises, and stratum groups tables to allow
 querying by area_id.
 
 ``` r
@@ -218,14 +218,14 @@ goasr_cpue<-get_gap_cpue(survey_definition_id = 47,
 # For WGOA shortraker below it pulled 40367 records. 
 # Add timing to track how long this takes
 start<-Sys.time()
-goasr_lengths<-get_gap_lengths(survey_definition_id = 47,
+goasr_length<-get_gap_length(survey_definition_id = 47,
                 area_id = 805,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
 end<-Sys.time()
 end-start
-#> Time difference of 14.49828 secs
+#> Time difference of 24.28171 secs
 
 # The specimen table contains length, sex, weight, and age data for individual fish.
 goasr_specimen<-get_gap_specimen(survey_definition_id = 47,
@@ -300,7 +300,7 @@ Download these tables in full and manipulate in R.
 ``` r
 gap_haul<-get_gap_haul()
 
-gap_cruise<-get_gap_cruises()
+gap_cruise<-get_gap_cruise()
 
 head(gap_haul)
 #> # A tibble: 6 × 28
