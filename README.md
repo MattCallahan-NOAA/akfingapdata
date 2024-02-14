@@ -11,7 +11,8 @@ from the AKFIN database using web services.
 ## Installation
 
 ``` r
-# devtools::install_github("MattCallahan-NOAA/akfingapdata")
+library(devtools)
+devtools::install_github("MattCallahan-NOAA/akfingapdata")
 ```
 
 ## Authentication
