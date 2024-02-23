@@ -8,5 +8,10 @@ Description: This package pulls the data from the AFSC groundfish assessment pro
     Documentation for these data is at github.com/afsc-gap-products/gap_products
 License: What license is it under?
 Encoding: UTF-8
+Imports: 
+    magrittr,
+    httr,
+    dplyr,
+    jsonlite
 LazyData: true
-Imports: magrittr, httr, dplyr
+

@@ -7,13 +7,12 @@
 #' @param start_year first year in the time series, default 1990.
 #' @param end_year last year in the time series, default to latest year,
 
-get_gap_cpue<-function(survey_definition_id=98, area_id=3, species_code=21740, start_year=1990, end_year=3000) {
+get_gap_cpue<-function(survey_definition_id=98,  species_code=21740, start_year=1990, end_year=3000) {
 
   # paste(... collapse=",") puts commas between vector elements
-  area_id <- paste(area_id, collapse = ",")
   species_code <- paste(species_code, collapse = ",")
   survey_definition_id<-paste(survey_definition_id, collapse = ",")
-  query <- list(survey_definition_id=survey_definition_id, area_id=area_id, species_code=species_code, start_year=start_year, end_year=end_year)
+  query <- list(survey_definition_id=survey_definition_id,  species_code=species_code, start_year=start_year, end_year=end_year)
 
   url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_cpue?"
 
