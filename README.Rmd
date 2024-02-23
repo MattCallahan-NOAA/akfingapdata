@@ -38,9 +38,6 @@ This is a generic web service error, rerun create_token() to continue querying.
 
 ```{r message = FALSE}
 library(akfingapdata)
-library(tidyverse)
-library(httr)
-library(jsonlite)
 
 token<-create_token("Callahan_token.txt")
 
