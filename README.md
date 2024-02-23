@@ -21,15 +21,7 @@ Please contact <matt.callahan@noaa.gov> for assistance setting up web
 service credentials. Authorized users will be issued a secret text
 string in a .txt file, which is encrypted using the create_token()
 function. This token is valid for about ten minutes. If it expires you
-will get the following error:
-
-Error: lexical error: invalid char in json text. \<!DOCTYPE html\>
-<html>
-
-\<style t (right here) ——^
-
-This is a generic web service error, rerun create_token() to continue
-querying.
+will get an error asking you to provide a valid token.
 
 ``` r
 library(akfingapdata)
@@ -59,7 +51,7 @@ lookup tables.
 ``` r
 # download species_code
 taxa<- get_gap_taxonomic_classification()
-#> Time Elapsed: 1.34 secs
+#> Time Elapsed: 1.29 secs
 
 # find species codes for shortraker rockfish
  taxa %>% filter(grepl("shortraker", tolower(common_name)))
@@ -80,7 +72,7 @@ taxa<- get_gap_taxonomic_classification()
 survey<-get_gap_survey_design()
 #> Time Elapsed: 0.07 secs
 area<-get_gap_area()
-#> Time Elapsed: 0.19 secs
+#> Time Elapsed: 0.21 secs
 stratum<-get_gap_stratum_groups()
 #> Time Elapsed: 0.13 secs
 
@@ -180,21 +172,21 @@ goasr_ages<-get_gap_agecomp(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 0.1 secs
+#> Time Elapsed: 0.09 secs
 
 goasr_biomass<-get_gap_biomass(survey_definition_id = 47,
                 area_id = 805,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 0.08 secs
+#> Time Elapsed: 0.09 secs
 
 goasr_sizecomp<-get_gap_sizecomp(survey_definition_id = 47,
                 area_id = 805,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 0.34 secs
+#> Time Elapsed: 0.29 secs
 
 head(goasr_sizecomp)
 #>   survey_definition_id year area_id species_code length_mm sex population_count
@@ -220,7 +212,7 @@ head(get_gap_agecomp(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023))
-#> Time Elapsed: 0.19 secs
+#> Time Elapsed: 0.16 secs
 #>   survey_definition_id area_id year species_code sex age population_count
 #> 1                   47   99903 2003        30576   2  16            46915
 #> 2                   47   99903 2003        30576   2  17           182649
@@ -249,14 +241,14 @@ goasr_catch<-get_gap_catch(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 0.25 secs
+#> Time Elapsed: 0.29 secs
 
 # The CPUE table includes zeros and thus has many more records
 goasr_cpue<-get_gap_cpue(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 2.26 secs
+#> Time Elapsed: 2.24 secs
 
 # The length table has ~150 million rows as of 2023. 
 # Even with filters it may load a large amount of data
@@ -267,7 +259,7 @@ goasr_length<-get_gap_length(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 1.87 secs
+#> Time Elapsed: 1.79 secs
 
 
 # The specimen table contains length, sex, weight, and age data for individual fish.
@@ -275,7 +267,7 @@ goasr_specimen<-get_gap_specimen(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 1.81 secs
+#> Time Elapsed: 1.78 secs
 
 head(goasr_specimen)
 #>   hauljoin specimen_id species_code length_mm sex weight_g age maturity gonad_g
@@ -370,10 +362,10 @@ Download these tables in full and manipulate in R.
 
 ``` r
 gap_haul<-get_gap_haul()
-#> Time Elapsed: 18.45 secs
+#> Time Elapsed: 18.69 secs
 
 gap_cruise<-get_gap_cruise()
-#> Time Elapsed: 0.18 secs
+#> Time Elapsed: 0.17 secs
 
 head(gap_haul)
 #>   cruisejoin hauljoin haul haul_type performance      date_time_start
@@ -420,5 +412,5 @@ GOA. It is downloaded in its entirety.
 
 ``` r
 split_fractions<-get_gap_split_fractions()
-#> Time Elapsed: 0.15 secs
+#> Time Elapsed: 0.13 secs
 ```

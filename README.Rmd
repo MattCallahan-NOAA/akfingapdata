@@ -28,13 +28,7 @@ This pacakge provides functions to download [gap_product](https://afsc-gap-produ
 In order to use this package you must be authorized to view these data.
 Please contact matt.callahan@noaa.gov for assistance setting up web service credentials.
 Authorized users will be issued a secret text string in a .txt file, which is encrypted using the create_token() function.
-This token is valid for about ten minutes. If it expires you will get the following error:
-
-Error: lexical error: invalid char in json text.
-                                       <!DOCTYPE html> <html> <style t
-                     (right here) ------^
-                     
-This is a generic web service error, rerun create_token() to continue querying.
+This token is valid for about ten minutes. If it expires you will get an error asking you to provide a valid token.
 
 ```{r message = FALSE}
 library(akfingapdata)
