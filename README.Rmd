@@ -70,16 +70,16 @@ stratum<-get_gap_stratum_groups()
 stratum<-stratum %>%
   left_join(survey %>%
               # remove year specific information from survey, we only need the region codes
-              group_by(survey) %>%
+              group_by(survey_definition_id) %>%
               summarize(survey_definition_id=max(survey_definition_id)), 
             by="survey_definition_id") %>%
   left_join(area,  by=c("area_id"="area_id", "survey_definition_id"="survey_definition_id", "design_year"="design_year"))
               # I get a many to one here that gives me two extra rows
 
-# look for the western Gulf
+# Look for the western Gulf
 # 805
 stratum %>%
-  filter(survey=="GOA",
+  filter(survey_definition_id=="GOA",
          area_type=="REGULATORY AREA",
          grepl("western", tolower(area_name))
          )
@@ -95,13 +95,6 @@ Agecomp, biomass, and sizecomp are calculated at the area_id level and survey_de
 ```{r}
 # Get Western GOA shortraker, agecomp, biomass from 2010 onward
 
-# No agecomp data for this area/species
-goasr_ages<-get_gap_agecomp(survey_definition_id = 47,
-                area_id = 805,
-                species_code = 30576,
-                start_year=1990,
-                end_year=2023)
-
 goasr_biomass<-get_gap_biomass(survey_definition_id = 47,
                 area_id = 805,
                 species_code = 30576,
@@ -116,17 +109,14 @@ goasr_sizecomp<-get_gap_sizecomp(survey_definition_id = 47,
 
 head(goasr_sizecomp)
 
-```
-
-```{r}
-# No agecomp for shortraker at that area, run gulfwide instead.
+# Gap only provides agecomps at strata and regional, not subregional, levels so I will run this gulf-wide. 
 head(get_gap_agecomp(survey_definition_id = 47,
                 area_id = 99903,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023))
-```
 
+```
 
 
 Catch, CPUE, Length, and Specimen tables contain haul level data.

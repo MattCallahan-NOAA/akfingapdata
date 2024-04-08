@@ -51,7 +51,7 @@ lookup tables.
 ``` r
 # download species_code
 taxa<- get_gap_taxonomic_classification()
-#> Time Elapsed: 1.29 secs
+#> Time Elapsed: 1.25 secs
 
 # find species codes for shortraker rockfish
  taxa %>% filter(grepl("shortraker", tolower(common_name)))
@@ -64,7 +64,7 @@ taxa<- get_gap_taxonomic_classification()
 #>   superclass_taxon subphylum_taxon phylum_taxon kingdom_taxon
 #> 1      Actinopteri      Vertebrata     Chordata      Animalia
 #>        akfin_load_date
-#> 1 2024-02-16T00:46:14Z
+#> 1 2024-03-11T19:47:10Z
 ```
 
 ``` r
@@ -72,83 +72,33 @@ taxa<- get_gap_taxonomic_classification()
 survey<-get_gap_survey_design()
 #> Time Elapsed: 0.07 secs
 area<-get_gap_area()
-#> Time Elapsed: 0.21 secs
-stratum<-get_gap_stratum_groups()
 #> Time Elapsed: 0.13 secs
+stratum<-get_gap_stratum_groups()
+#> Time Elapsed: 0.14 secs
 
 #combine spatial lookup tables
 stratum<-stratum %>%
   left_join(survey %>%
               # remove year specific information from survey, we only need the region codes
-              group_by(survey) %>%
+              group_by(survey_definition_id) %>%
               summarize(survey_definition_id=max(survey_definition_id)), 
             by="survey_definition_id") %>%
   left_join(area,  by=c("area_id"="area_id", "survey_definition_id"="survey_definition_id", "design_year"="design_year"))
-#> Warning in left_join(., area, by = c(area_id = "area_id", survey_definition_id = "survey_definition_id", : Detected an unexpected many-to-many relationship between `x` and `y`.
-#> ℹ Row 115 of `x` matches multiple rows in `y`.
-#> ℹ Row 144 of `y` matches multiple rows in `x`.
-#> ℹ If a many-to-many relationship is expected, set `relationship =
-#>   "many-to-many"` to silence this warning.
               # I get a many to one here that gives me two extra rows
 
-# look for the western Gulf
+# Look for the western Gulf
 # 805
 stratum %>%
-  filter(survey=="GOA",
+  filter(survey_definition_id=="GOA",
          area_type=="REGULATORY AREA",
          grepl("western", tolower(area_name))
          )
-#>    area_id survey_definition_id design_year stratum    akfin_load_date.x survey
-#> 1      805                   47        1984      10 2024-02-16T00:46:14Z    GOA
-#> 2      805                   47        1984      11 2024-02-16T00:46:14Z    GOA
-#> 3      805                   47        1984      12 2024-02-16T00:46:14Z    GOA
-#> 4      805                   47        1984      13 2024-02-16T00:46:14Z    GOA
-#> 5      805                   47        1984     110 2024-02-16T00:46:14Z    GOA
-#> 6      805                   47        1984     111 2024-02-16T00:46:14Z    GOA
-#> 7      805                   47        1984     112 2024-02-16T00:46:14Z    GOA
-#> 8      805                   47        1984     210 2024-02-16T00:46:14Z    GOA
-#> 9      805                   47        1984     310 2024-02-16T00:46:14Z    GOA
-#> 10     805                   47        1984     410 2024-02-16T00:46:14Z    GOA
-#> 11     805                   47        1984     510 2024-02-16T00:46:14Z    GOA
-#> 12     806                   47        2025      14 2024-02-16T00:46:14Z    GOA
-#> 13     806                   47        2025     113 2024-02-16T00:46:14Z    GOA
-#> 14     806                   47        2025     211 2024-02-16T00:46:14Z    GOA
-#> 15     806                   47        2025     411 2024-02-16T00:46:14Z    GOA
-#> 16     806                   47        2025     511 2024-02-16T00:46:14Z    GOA
-#>          area_type   area_name         description area_km2 depth_min_m
-#> 1  REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 2  REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 3  REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 4  REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 5  REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 6  REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 7  REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 8  REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 9  REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 10 REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 11 REGULATORY AREA Western GOA WESTERN GOA - INPFC       NA          NA
-#> 12 REGULATORY AREA Western GOA  WESTERN GOA - NMFS       NA          NA
-#> 13 REGULATORY AREA Western GOA  WESTERN GOA - NMFS       NA          NA
-#> 14 REGULATORY AREA Western GOA  WESTERN GOA - NMFS       NA          NA
-#> 15 REGULATORY AREA Western GOA  WESTERN GOA - NMFS       NA          NA
-#> 16 REGULATORY AREA Western GOA  WESTERN GOA - NMFS       NA          NA
-#>    depth_max_m crs    akfin_load_date.y
-#> 1           NA  NA 2024-02-16T00:46:14Z
-#> 2           NA  NA 2024-02-16T00:46:14Z
-#> 3           NA  NA 2024-02-16T00:46:14Z
-#> 4           NA  NA 2024-02-16T00:46:14Z
-#> 5           NA  NA 2024-02-16T00:46:14Z
-#> 6           NA  NA 2024-02-16T00:46:14Z
-#> 7           NA  NA 2024-02-16T00:46:14Z
-#> 8           NA  NA 2024-02-16T00:46:14Z
-#> 9           NA  NA 2024-02-16T00:46:14Z
-#> 10          NA  NA 2024-02-16T00:46:14Z
-#> 11          NA  NA 2024-02-16T00:46:14Z
-#> 12          NA  NA 2024-02-16T00:46:14Z
-#> 13          NA  NA 2024-02-16T00:46:14Z
-#> 14          NA  NA 2024-02-16T00:46:14Z
-#> 15          NA  NA 2024-02-16T00:46:14Z
-#> 16          NA  NA 2024-02-16T00:46:14Z
+#>  [1] area_id              survey_definition_id design_year         
+#>  [4] stratum              akfin_load_date.x    area_type           
+#>  [7] area_name            description          area_km2            
+#> [10] depth_min_m          depth_max_m          crs                 
+#> [13] akfin_load_date.y   
+#> <0 rows> (or 0-length row.names)
 ```
 
 ## Data tables
@@ -166,67 +116,57 @@ level and survey_definition_id and area_id are built into those tables.
 ``` r
 # Get Western GOA shortraker, agecomp, biomass from 2010 onward
 
-# No agecomp data for this area/species
-goasr_ages<-get_gap_agecomp(survey_definition_id = 47,
-                area_id = 805,
-                species_code = 30576,
-                start_year=1990,
-                end_year=2023)
-#> Time Elapsed: 0.09 secs
-
 goasr_biomass<-get_gap_biomass(survey_definition_id = 47,
                 area_id = 805,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 0.09 secs
+#> Time Elapsed: 0.08 secs
 
 goasr_sizecomp<-get_gap_sizecomp(survey_definition_id = 47,
                 area_id = 805,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 0.29 secs
+#> Time Elapsed: 0.55 secs
 
 head(goasr_sizecomp)
 #>   survey_definition_id year area_id species_code length_mm sex population_count
-#> 1                   47 2001     805        30576       620   2            16861
-#> 2                   47 2001     805        30576       640   2            17300
-#> 3                   47 2003     805        30576       250   1            12038
-#> 4                   47 2003     805        30576       260   1            12038
-#> 5                   47 2003     805        30576       320   1            10946
-#> 6                   47 2003     805        30576       340   1            10626
+#> 1                   47 2011     805        30576       930   1            11289
+#> 2                   47 2011     805        30576       340   2            18933
+#> 3                   47 2011     805        30576       390   2            18933
+#> 4                   47 2011     805        30576       420   2            33547
+#> 5                   47 2011     805        30576       430   2            48949
+#> 6                   47 2011     805        30576       440   2            14614
 #>        akfin_load_date
-#> 1 2024-02-16T00:46:14Z
-#> 2 2024-02-16T00:46:14Z
-#> 3 2024-02-16T00:46:14Z
-#> 4 2024-02-16T00:46:14Z
-#> 5 2024-02-16T00:46:14Z
-#> 6 2024-02-16T00:46:14Z
-```
+#> 1 2024-03-11T19:47:10Z
+#> 2 2024-03-11T19:47:10Z
+#> 3 2024-03-11T19:47:10Z
+#> 4 2024-03-11T19:47:10Z
+#> 5 2024-03-11T19:47:10Z
+#> 6 2024-03-11T19:47:10Z
 
-``` r
-# No agecomp for shortraker at that area, run gulfwide instead.
+# Gap only provides agecomps at strata and regional, not subregional, levels so I will run this gulf-wide. 
 head(get_gap_agecomp(survey_definition_id = 47,
                 area_id = 99903,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023))
-#> Time Elapsed: 0.16 secs
+#> Time Elapsed: 0.19 secs
 #>   survey_definition_id area_id year species_code sex age population_count
-#> 1                   47   99903 2003        30576   2  16            46915
-#> 2                   47   99903 2003        30576   2  17           182649
-#> 3                   47   99903 2003        30576   2  18            47502
-#> 4                   47   99903 2003        30576   2  19            14604
-#> 5                   47   99903 2003        30576   2  20           254533
-#> 6                   47   99903 2003        30576   2  21           156891
-#>   length_mm_mean length_mm_sd      akfin_load_date
-#> 1         403.77         9.26 2024-02-16T00:46:14Z
-#> 2         408.45        44.66 2024-02-16T00:46:14Z
-#> 3         365.40         4.98 2024-02-16T00:46:14Z
-#> 4         390.00         0.00 2024-02-16T00:46:14Z
-#> 5         434.59        30.73 2024-02-16T00:46:14Z
-#> 6         501.29        67.40 2024-02-16T00:46:14Z
+#> 1                   47   99903 1996        30576   2  22            37760
+#> 2                   47   99903 1996        30576   2  23            60419
+#> 3                   47   99903 1996        30576   2  24            79964
+#> 4                   47   99903 1996        30576   2  25           111793
+#> 5                   47   99903 1996        30576   2  26            84104
+#> 6                   47   99903 1996        30576   2  27            90578
+#>   length_mm_mean length_mm_sd area_id_footprint      akfin_load_date
+#> 1         532.45        26.28               GOA 2024-03-11T19:47:10Z
+#> 2         554.75        77.11               GOA 2024-03-11T19:47:10Z
+#> 3         513.07        52.43               GOA 2024-03-11T19:47:10Z
+#> 4         570.96        83.36               GOA 2024-03-11T19:47:10Z
+#> 5         482.10        59.59               GOA 2024-03-11T19:47:10Z
+#> 6         519.93        68.68               GOA 2024-03-11T19:47:10Z
 ```
 
 Catch, CPUE, Length, and Specimen tables contain haul level data. The
@@ -241,14 +181,14 @@ goasr_catch<-get_gap_catch(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 0.29 secs
+#> Time Elapsed: 0.32 secs
 
 # The CPUE table includes zeros and thus has many more records
 goasr_cpue<-get_gap_cpue(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 2.24 secs
+#> Time Elapsed: 2.26 secs
 
 # The length table has ~150 million rows as of 2023. 
 # Even with filters it may load a large amount of data
@@ -259,7 +199,7 @@ goasr_length<-get_gap_length(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 1.79 secs
+#> Time Elapsed: 2.1 secs
 
 
 # The specimen table contains length, sex, weight, and age data for individual fish.
@@ -267,7 +207,7 @@ goasr_specimen<-get_gap_specimen(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 1.78 secs
+#> Time Elapsed: 1.74 secs
 
 head(goasr_specimen)
 #>   hauljoin specimen_id species_code length_mm sex weight_g age maturity gonad_g
@@ -285,12 +225,12 @@ head(goasr_specimen)
 #> 5                         5                    1                       NA
 #> 6                         5                    1                       NA
 #>        akfin_load_date stratum survey_definition_id year
-#> 1 2024-02-16T00:46:14Z     310                   47 1993
-#> 2 2024-02-16T00:46:14Z     310                   47 1993
-#> 3 2024-02-16T00:46:14Z     310                   47 1993
-#> 4 2024-02-16T00:46:14Z     310                   47 1993
-#> 5 2024-02-16T00:46:14Z     310                   47 1993
-#> 6 2024-02-16T00:46:14Z     310                   47 1993
+#> 1 2024-03-11T19:47:10Z     310                   47 1993
+#> 2 2024-03-11T19:47:10Z     310                   47 1993
+#> 3 2024-03-11T19:47:10Z     310                   47 1993
+#> 4 2024-03-11T19:47:10Z     310                   47 1993
+#> 5 2024-03-11T19:47:10Z     310                   47 1993
+#> 6 2024-03-11T19:47:10Z     310                   47 1993
 ```
 
 To query more than one species (or area) at a time use the lapply
@@ -312,8 +252,8 @@ taxa %>% filter(grepl("rougheye", common_name))
 #> 1        <NA>             <NA>            <NA>         <NA>          <NA>
 #> 2   Teleostei      Actinopteri      Vertebrata     Chordata      Animalia
 #>        akfin_load_date
-#> 1 2024-02-16T00:46:14Z
-#> 2 2024-02-16T00:46:14Z
+#> 1 2024-03-11T19:47:10Z
+#> 2 2024-03-11T19:47:10Z
 
 myspecies <- c(30050, 30051)
 
@@ -325,8 +265,8 @@ goa_resr_biomass<-lapply(myspecies, FUN = function(x) get_gap_biomass(
   end_year=2023)) %>%
   bind_rows() %>%
   arrange(year)
-#> Time Elapsed: 0.07 secs
-#> Time Elapsed: 0.07 secs
+#> Time Elapsed: 0.08 secs
+#> Time Elapsed: 0.08 secs
 
 
 head(goa_resr_biomass)
@@ -345,12 +285,12 @@ head(goa_resr_biomass)
 #> 5        0        0.000000       0.000000        0.000000       0.000000
 #> 6        5        5.289361       6.877931        3.146554       2.120705
 #>   biomass_mt biomass_var population_count population_var      akfin_load_date
-#> 1     0.0000        0.00                0              0 2024-02-16T00:46:14Z
-#> 2   596.5102    79692.12           623273    48139437143 2024-02-16T00:46:14Z
-#> 3     0.0000        0.00                0              0 2024-02-16T00:46:14Z
-#> 4   759.9175   163556.88           534491    49855965270 2024-02-16T00:46:14Z
-#> 5     0.0000        0.00                0              0 2024-02-16T00:46:14Z
-#> 6   334.7664    27550.86           199147     8494888884 2024-02-16T00:46:14Z
+#> 1     0.0000        0.00                0              0 2024-03-11T19:47:10Z
+#> 2   596.5102    79692.12           623273    48139437143 2024-03-11T19:47:10Z
+#> 3     0.0000        0.00                0              0 2024-03-11T19:47:10Z
+#> 4   759.9175   163556.88           534491    49855965270 2024-03-11T19:47:10Z
+#> 5     0.0000        0.00                0              0 2024-03-11T19:47:10Z
+#> 6   334.7664    27550.86           199147     8494888884 2024-03-11T19:47:10Z
 
 # trying the same thing with the other functions produces the same generic error as when the token is expired.
 ```
@@ -362,47 +302,47 @@ Download these tables in full and manipulate in R.
 
 ``` r
 gap_haul<-get_gap_haul()
-#> Time Elapsed: 18.69 secs
+#> Time Elapsed: 18.59 secs
 
 gap_cruise<-get_gap_cruise()
-#> Time Elapsed: 0.17 secs
+#> Time Elapsed: 0.18 secs
 
 head(gap_haul)
 #>   cruisejoin hauljoin haul haul_type performance      date_time_start
-#> 1       -608   -13062  183         3        0.00 2005-07-02T17:03:26Z
-#> 2       -608   -13063  184         3        0.00 2005-07-02T18:34:45Z
-#> 3       -608   -13064  185         3        1.11 2005-07-02T20:12:55Z
-#> 4       -608   -13065  186         3        0.00 2005-07-02T23:03:10Z
-#> 5       -608   -13066  187         3        0.00 2005-07-03T14:15:20Z
-#> 6       -608   -13067  188         3        0.00 2005-07-03T16:22:22Z
+#> 1       -608   -12940   61         3           0 2005-06-05T19:50:18Z
+#> 2       -608   -12942   63         3           0 2005-06-06T02:48:28Z
+#> 3       -608   -12943   64         3           0 2005-06-06T14:08:09Z
+#> 4       -608   -12944   65         3           0 2005-06-06T17:01:43Z
+#> 5       -608   -12945   66         3           0 2005-06-06T21:01:37Z
+#> 6       -608   -12946   67         3           0 2005-06-06T23:58:31Z
 #>   duration_hr distance_fished_km net_width_m net_measured net_height_m stratum
-#> 1       0.256              1.431      15.470            1        7.524      31
-#> 2       0.266              1.495      15.668            1        7.417      31
-#> 3       0.258              1.440      15.705            1        7.581      31
-#> 4       0.262              1.477      15.127            1        7.225      31
-#> 5       0.257              1.462      16.420            1        6.550     330
-#> 6       0.262              1.478      15.949            1        6.668     330
+#> 1       0.252              1.416      15.588            1        7.246      13
+#> 2       0.253              1.405      15.741            1        7.214      13
+#> 3       0.256              1.459      14.046            1        8.350      13
+#> 4       0.253              1.419      15.077            1        7.531      13
+#> 5       0.254              1.414      16.230            1        6.655     112
+#> 6       0.254              1.448      15.517            1        7.044      12
 #>   latitude_dd_start latitude_dd_end longitude_dd_start longitude_dd_end station
-#> 1          57.46529        57.47803          -151.1313        -151.1304 228-121
-#> 2          57.45372        57.45961          -151.2179        -151.2399 227-121
-#> 3          57.61075        57.62205          -151.0859        -151.0754 229-124
-#> 4          57.83390        57.82148          -150.5573        -150.5644 235-129
-#> 5          57.53942        57.53059          -150.1437        -150.1611 240-122
-#> 6          57.49053        57.48185          -150.1499        -150.1679 240-121
+#> 1          54.90090        54.90018          -158.7672        -158.7455  136-63
+#> 2          55.11358        55.11597          -159.4265        -159.4478  128-68
+#> 3          54.84635        54.83851          -159.7782        -159.7959  124-61
+#> 4          55.00704        55.01904          -159.9825        -159.9768  121-65
+#> 5          55.45979        55.46384          -159.6435        -159.6644  125-76
+#> 6          55.52143        55.53019          -160.2696        -160.2534  118-77
 #>   depth_gear_m depth_m bottom_type surface_temperature_c gear_temperature_c
-#> 1           79      87           4                  10.3                7.3
-#> 2           83      90           4                  10.7                7.2
-#> 3           71      79        <NA>                  10.6                7.7
-#> 4           79      86        <NA>                  11.3                6.7
-#> 5          326     333        <NA>                  12.6                4.5
-#> 6          468     475        <NA>                  12.9                4.0
+#> 1           80      87           6                   7.5                4.4
+#> 2           77      84           3                   6.8                4.5
+#> 3           30      38           4                   6.5                6.1
+#> 4           33      41           6                   6.4                5.3
+#> 5          148     155           1                   7.6                4.7
+#> 6           65      72           6                   6.9                5.3
 #>   wire_length_m gear accessories      akfin_load_date
-#> 1           320  172         129 2024-02-16T00:46:14Z
-#> 2           320  172         129 2024-02-16T00:46:14Z
-#> 3           274  172         129 2024-02-16T00:46:14Z
-#> 4           320  172         129 2024-02-16T00:46:14Z
-#> 5           823  172         129 2024-02-16T00:46:14Z
-#> 6          1097  172         129 2024-02-16T00:46:14Z
+#> 1           320  172         129 2024-03-11T19:47:10Z
+#> 2           320  172         129 2024-03-11T19:47:10Z
+#> 3           229  172         129 2024-03-11T19:47:10Z
+#> 4           229  172         129 2024-03-11T19:47:10Z
+#> 5           457  172         129 2024-03-11T19:47:10Z
+#> 6           274  172         129 2024-03-11T19:47:10Z
 ```
 
 ## Split Fractions
@@ -412,5 +352,5 @@ GOA. It is downloaded in its entirety.
 
 ``` r
 split_fractions<-get_gap_split_fractions()
-#> Time Elapsed: 0.13 secs
+#> Time Elapsed: 0.15 secs
 ```
