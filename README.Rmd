@@ -28,14 +28,17 @@ This pacakge provides functions to download [gap_product](https://afsc-gap-produ
 In order to use this package you must be authorized to view these data.
 Please contact matt.callahan@noaa.gov for assistance setting up web service credentials.
 Authorized users will be issued a secret text string in a .txt file, which is encrypted using the create_token() function.
+The create_token function accepts a filepath to the textfile or a keyring package service input.
 This token is valid for about ten minutes. If it expires you will get an error asking you to provide a valid token.
+You must define the function output as token as in the example below. 
 
 ```{r message = FALSE}
 library(akfingapdata)
 library(tidyverse)
+library(keyring)
 
-token<-create_token("Callahan_token.txt")
-
+token<-create_token("akfin_secret") # keyring input
+# token<-create_token("Callahan_token.txt") file version
 ```
 
 ## Metadata
@@ -115,6 +118,17 @@ head(get_gap_agecomp(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023))
+
+```
+
+Note that Eastern Bering Sea stratum level age compositions are calculated using "EBS STANDARD" and "EBS STANDARD PLUS NW" girds. The get_gap_agecomp() function has an optional area_id_footprint argument that specifies which footprint to use (default is "EBS STANDARD PLUS NW"). 
+
+```{r}
+unique(get_gap_agecomp(
+  survey_definition_id = 98, area_id = 50,species_code = 21370,start_year=1990,end_year=2023,area_id_footprint = "EBS STANDARD PLUS NW")$area_id_footprint)
+
+unique(get_gap_agecomp(
+  survey_definition_id = 98, area_id = 50,species_code = 21370,start_year=1990,end_year=2023,area_id_footprint = "EBS STANDARD")$area_id_footprint)
 
 ```
 

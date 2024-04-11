@@ -10,8 +10,9 @@
 #' @param species_code RACE species code for which biomass is calculated.
 #' @param start_year first year in the time series, default 1990.
 #' @param end_year last year in the time series, default to latest year,
+#' @param area_id_footprint Eastern Bering Sea only. Optional parameter specifying whether to use the "EBS STANDARD PLUS NW" (Default) or "EBS STANDARD" area_id_footprint.
 
-get_gap_agecomp<-function(survey_definition_id=98, area_id=99900, species_code=21740, start_year=1990, end_year=3000) {
+get_gap_agecomp<-function(survey_definition_id=98, area_id=99900, species_code=21740, start_year=1990, end_year=3000, area_id_footprint=NA) {
   start_time <- Sys.time()
 
   if(!exists("token")) {
@@ -50,10 +51,26 @@ get_gap_agecomp<-function(survey_definition_id=98, area_id=99900, species_code=2
     message("No end_year provided, defaulting to latest year")
   }
 
+  footprint_options <- c("EBS STANDARD PLUS NW", "EBS STANDARD")
+  aif <- area_id_footprint
+
+  if(survey_definition_id == 98 & aif %in% footprint_options) {
+    data <- data |>
+      filter(area_id_footprint == aif)
+    message(paste0("Agecomps calculated using ", aif, " area_id_footprint"))
+  }
+
+  if(survey_definition_id == 98 & !(aif %in% footprint_options)) {
+    data <- data |>
+      filter(area_id_footprint == "EBS STANDARD PLUS NW")
+    message(paste0("Defaulting to EBS STANDARD PLUS NW area_id_footprint"))
+  }
+
   end_time <- Sys.time()
   message(paste("Time Elapsed:", round(end_time - start_time, 2),
                 units(end_time - start_time)))
   return(data)
 
 }
+
 

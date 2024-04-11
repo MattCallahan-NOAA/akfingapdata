@@ -20,14 +20,19 @@ In order to use this package you must be authorized to view these data.
 Please contact <matt.callahan@noaa.gov> for assistance setting up web
 service credentials. Authorized users will be issued a secret text
 string in a .txt file, which is encrypted using the create_token()
-function. This token is valid for about ten minutes. If it expires you
-will get an error asking you to provide a valid token.
+function. The create_token function accepts a filepath to the textfile
+or a keyring package service input. This token is valid for about ten
+minutes. If it expires you will get an error asking you to provide a
+valid token. You must define the function output as token as in the
+example below.
 
 ``` r
 library(akfingapdata)
 library(tidyverse)
+library(keyring)
 
-token<-create_token("Callahan_token.txt")
+token<-create_token("akfin_secret") # keyring input
+# token<-create_token("Callahan_token.txt") file version
 ```
 
 ## Metadata
@@ -51,7 +56,7 @@ lookup tables.
 ``` r
 # download species_code
 taxa<- get_gap_taxonomic_classification()
-#> Time Elapsed: 1.25 secs
+#> Time Elapsed: 2.96 secs
 
 # find species codes for shortraker rockfish
  taxa %>% filter(grepl("shortraker", tolower(common_name)))
@@ -70,11 +75,11 @@ taxa<- get_gap_taxonomic_classification()
 ``` r
 # download survey, area, and stratum group tables
 survey<-get_gap_survey_design()
-#> Time Elapsed: 0.07 secs
+#> Time Elapsed: 0.15 secs
 area<-get_gap_area()
-#> Time Elapsed: 0.13 secs
+#> Time Elapsed: 0.27 secs
 stratum<-get_gap_stratum_groups()
-#> Time Elapsed: 0.14 secs
+#> Time Elapsed: 0.29 secs
 
 #combine spatial lookup tables
 stratum<-stratum %>%
@@ -121,14 +126,14 @@ goasr_biomass<-get_gap_biomass(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 0.08 secs
+#> Time Elapsed: 0.15 secs
 
 goasr_sizecomp<-get_gap_sizecomp(survey_definition_id = 47,
                 area_id = 805,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 0.55 secs
+#> Time Elapsed: 0.41 secs
 
 head(goasr_sizecomp)
 #>   survey_definition_id year area_id species_code length_mm sex population_count
@@ -152,7 +157,7 @@ head(get_gap_agecomp(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023))
-#> Time Elapsed: 0.19 secs
+#> Time Elapsed: 0.32 secs
 #>   survey_definition_id area_id year species_code sex age population_count
 #> 1                   47   99903 1996        30576   2  22            37760
 #> 2                   47   99903 1996        30576   2  23            60419
@@ -169,6 +174,26 @@ head(get_gap_agecomp(survey_definition_id = 47,
 #> 6         519.93        68.68               GOA 2024-03-11T19:47:10Z
 ```
 
+Note that Eastern Bering Sea stratum level age compositions are
+calculated using “EBS STANDARD” and “EBS STANDARD PLUS NW” girds. The
+get_gap_agecomp() function has an optional area_id_footprint argument
+that specifies which footprint to use (default is “EBS STANDARD PLUS
+NW”).
+
+``` r
+unique(get_gap_agecomp(
+  survey_definition_id = 98, area_id = 50,species_code = 21370,start_year=1990,end_year=2023,area_id_footprint = "EBS STANDARD PLUS NW")$area_id_footprint)
+#> Agecomps calculated using EBS STANDARD PLUS NW area_id_footprint
+#> Time Elapsed: 0.2 secs
+#> [1] "EBS STANDARD PLUS NW"
+
+unique(get_gap_agecomp(
+  survey_definition_id = 98, area_id = 50,species_code = 21370,start_year=1990,end_year=2023,area_id_footprint = "EBS STANDARD")$area_id_footprint)
+#> Agecomps calculated using EBS STANDARD area_id_footprint
+#> Time Elapsed: 0.19 secs
+#> [1] "EBS STANDARD"
+```
+
 Catch, CPUE, Length, and Specimen tables contain haul level data. The
 web service joins the haul and cruises tables to allow querying by
 survey.
@@ -181,14 +206,14 @@ goasr_catch<-get_gap_catch(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 0.32 secs
+#> Time Elapsed: 0.54 secs
 
 # The CPUE table includes zeros and thus has many more records
 goasr_cpue<-get_gap_cpue(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 2.26 secs
+#> Time Elapsed: 5.06 secs
 
 # The length table has ~150 million rows as of 2023. 
 # Even with filters it may load a large amount of data
@@ -199,7 +224,7 @@ goasr_length<-get_gap_length(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 2.1 secs
+#> Time Elapsed: 3.84 secs
 
 
 # The specimen table contains length, sex, weight, and age data for individual fish.
@@ -207,7 +232,7 @@ goasr_specimen<-get_gap_specimen(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-#> Time Elapsed: 1.74 secs
+#> Time Elapsed: 3.94 secs
 
 head(goasr_specimen)
 #>   hauljoin specimen_id species_code length_mm sex weight_g age maturity gonad_g
@@ -265,8 +290,8 @@ goa_resr_biomass<-lapply(myspecies, FUN = function(x) get_gap_biomass(
   end_year=2023)) %>%
   bind_rows() %>%
   arrange(year)
-#> Time Elapsed: 0.08 secs
-#> Time Elapsed: 0.08 secs
+#> Time Elapsed: 0.17 secs
+#> Time Elapsed: 0.15 secs
 
 
 head(goa_resr_biomass)
@@ -302,10 +327,10 @@ Download these tables in full and manipulate in R.
 
 ``` r
 gap_haul<-get_gap_haul()
-#> Time Elapsed: 18.59 secs
+#> Time Elapsed: 42.44 secs
 
 gap_cruise<-get_gap_cruise()
-#> Time Elapsed: 0.18 secs
+#> Time Elapsed: 0.85 secs
 
 head(gap_haul)
 #>   cruisejoin hauljoin haul haul_type performance      date_time_start
@@ -352,5 +377,5 @@ GOA. It is downloaded in its entirety.
 
 ``` r
 split_fractions<-get_gap_split_fractions()
-#> Time Elapsed: 0.15 secs
+#> Time Elapsed: 0.29 secs
 ```
