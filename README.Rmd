@@ -57,7 +57,8 @@ In order to correctly define these parameters, first download several lookup tab
 
 ```{r }
 # download species_code
-taxa<- get_gap_taxonomic_classification()
+# The akfin_taxonomic_groups table supersedes the akfin_taxonomic_classification table, these tables have the same structure, except the groups table has a group column designating which group code a species corresponds to for species that have comps calculated at the group level rather than individually. 
+taxa<- get_gap_taxonomic_groups()
 
 # find species codes for shortraker rockfish
  taxa %>% filter(grepl("shortraker", tolower(common_name)))
