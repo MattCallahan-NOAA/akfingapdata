@@ -28,22 +28,17 @@ This pacakge provides functions to download [gap_product](https://afsc-gap-produ
 In order to use this package you must be authorized to view these data.
 Please contact matt.callahan@noaa.gov for assistance setting up web service credentials.
 Authorized users will be issued a secret text string in a .txt file, which is encrypted using the create_token() function.
-This token is valid for about ten minutes. If it expires you will get the following error:
-
-Error: lexical error: invalid char in json text.
-                                       <!DOCTYPE html> <html> <style t
-                     (right here) ------^
-                     
-This is a generic web service error, rerun create_token() to continue querying.
+The create_token function accepts a filepath to the textfile or a keyring package service input.
+This token is valid for about ten minutes. If it expires you will get an error asking you to provide a valid token.
+You must define the function output as token as in the example below. 
 
 ```{r message = FALSE}
 library(akfingapdata)
 library(tidyverse)
-library(httr)
-library(jsonlite)
+library(keyring)
 
-token<-create_token("Callahan_token.txt")
-
+token<-create_token("akfin_secret") # keyring input
+# token<-create_token("Callahan_token.txt") file version
 ```
 
 ## Metadata
@@ -57,19 +52,20 @@ metadata<-get_gap_metadata_column()
 
 ## Lookup tables
 
-Most functions require survey_definition_id, area_id, species_code, start_year, and end_year as parameters. 
+Some functions require survey_definition_id, species_code, area_id, start_year, and end_year as parameters.  
 In order to correctly define these parameters, first download several lookup tables. 
 
 ```{r }
 # download species_code
-taxa<- get_gap_taxonomic_classification()
+# The akfin_taxonomic_groups table supersedes the akfin_taxonomic_classification table, these tables have the same structure, except the groups table has a group column designating which group code a species corresponds to for species that have comps calculated at the group level rather than individually. 
+taxa<- get_gap_taxonomic_groups()
 
 # find species codes for shortraker rockfish
  taxa %>% filter(grepl("shortraker", tolower(common_name)))
 ```
 
 ```{r}
-# download survey, area, and strata tables
+# download survey, area, and stratum group tables
 survey<-get_gap_survey_design()
 area<-get_gap_area()
 stratum<-get_gap_stratum_groups()
@@ -78,17 +74,17 @@ stratum<-get_gap_stratum_groups()
 stratum<-stratum %>%
   left_join(survey %>%
               # remove year specific information from survey, we only need the region codes
-              group_by(survey) %>%
+              group_by(survey_definition_id) %>%
               summarize(survey_definition_id=max(survey_definition_id)), 
             by="survey_definition_id") %>%
   left_join(area,  by=c("area_id"="area_id", "survey_definition_id"="survey_definition_id", "design_year"="design_year"))
               # I get a many to one here that gives me two extra rows
 
-# look for the western Gulf
+# Look for the western Gulf
 # 805
 stratum %>%
-  filter(survey=="GOA",
-         type=="REGULATORY AREA",
+  filter(survey_definition_id=="GOA",
+         area_type=="REGULATORY AREA",
          grepl("western", tolower(area_name))
          )
 ```
@@ -102,13 +98,6 @@ Agecomp, biomass, and sizecomp are calculated at the area_id level and survey_de
 
 ```{r}
 # Get Western GOA shortraker, agecomp, biomass from 2010 onward
-
-# No agecomp data for this area/species
-goasr_ages<-get_gap_agecomp(survey_definition_id = 47,
-                area_id = 805,
-                species_code = 30576,
-                start_year=1990,
-                end_year=2023)
 
 goasr_biomass<-get_gap_biomass(survey_definition_id = 47,
                 area_id = 805,
@@ -124,35 +113,41 @@ goasr_sizecomp<-get_gap_sizecomp(survey_definition_id = 47,
 
 head(goasr_sizecomp)
 
-```
-
-```{r}
-# No agecomp for shortraker at that area, run gulfwide instead.
+# Gap only provides agecomps at strata and regional, not subregional, levels so I will run this gulf-wide. 
 head(get_gap_agecomp(survey_definition_id = 47,
                 area_id = 99903,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023))
+
+```
+
+Note that Eastern Bering Sea stratum level age compositions are calculated using "EBS STANDARD" and "EBS STANDARD PLUS NW" girds. The get_gap_agecomp() function has an optional area_id_footprint argument that specifies which footprint to use (default is "EBS STANDARD PLUS NW"). 
+
+```{r}
+unique(get_gap_agecomp(
+  survey_definition_id = 98, area_id = 50,species_code = 21370,start_year=1990,end_year=2023,area_id_footprint = "EBS STANDARD PLUS NW")$area_id_footprint)
+
+unique(get_gap_agecomp(
+  survey_definition_id = 98, area_id = 50,species_code = 21370,start_year=1990,end_year=2023,area_id_footprint = "EBS STANDARD")$area_id_footprint)
+
 ```
 
 
-
 Catch, CPUE, Length, and Specimen tables contain haul level data.
-The web service joins the haul, cruises, and stratum groups tables to allow querying by area_id.
+The web service joins the haul and cruises tables to allow querying by survey.
 
 ```{r}
 # Get catch, cpue, length frequency, and specimens at a haul level for Western GOA shortraker
 
 # The catch table only includes records where the species were caught
 goasr_catch<-get_gap_catch(survey_definition_id = 47,
-                area_id = 805,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
 
 # The CPUE table includes zeros and thus has many more records
 goasr_cpue<-get_gap_cpue(survey_definition_id = 47,
-                area_id = 805,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
@@ -161,18 +156,15 @@ goasr_cpue<-get_gap_cpue(survey_definition_id = 47,
 # Even with filters it may load a large amount of data
 # For WGOA shortraker below it pulled 40367 records. 
 # Add timing to track how long this takes
-start<-Sys.time()
+
 goasr_length<-get_gap_length(survey_definition_id = 47,
-                area_id = 805,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
-end<-Sys.time()
-end-start
+
 
 # The specimen table contains length, sex, weight, and age data for individual fish.
 goasr_specimen<-get_gap_specimen(survey_definition_id = 47,
-                area_id = 805,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
@@ -180,17 +172,22 @@ goasr_specimen<-get_gap_specimen(survey_definition_id = 47,
 head(goasr_specimen)
 ```
 
-I set up the get_gap_biomass() function to also accept vectors as inputs allowing users to query more than one species at a time. I could set up the rest of them to do the same thing if useful. 
+To query more than one species (or area) at a time use the lapply function or a for loop. 
 
 ```{r}
 # Get rougheye and shortraker biomass for the WGOA
 taxa %>% filter(grepl("rougheye", common_name))
 
-goa_resr_biomass<-get_gap_biomass(survey_definition_id = 47,
-                area_id = 805,
-                species_code = c(30576, 30051),
-                start_year=1990,
-                end_year=2023)
+myspecies <- c(30050, 30051)
+
+goa_resr_biomass<-lapply(myspecies, FUN = function(x) get_gap_biomass(
+  survey_definition_id = 47,
+  area_id = 805,
+  species_code = x,
+  start_year=2007,
+  end_year=2023)) %>%
+  bind_rows() %>%
+  arrange(year)
 
 
 head(goa_resr_biomass)

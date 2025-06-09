@@ -5,6 +5,7 @@
 #' x<-"12345..:abcd.."
 #' token <- create_token(x)
 #' Otherwise, this function accepts keyring and text file input
+#' This function accepts keyring and text file input
 #' token<- create_token("akfin_secret") # keyring service storing secret string
 #' token<- create_token("Callahan_token.txt") # text file storing your secret string
 
@@ -36,3 +37,4 @@ create_token<-function(x) {
   paste("Bearer", httr::content(req)$access_token)
 
 }
+

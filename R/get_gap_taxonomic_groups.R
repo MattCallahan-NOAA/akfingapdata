@@ -1,14 +1,17 @@
-#' get_gap_area
-#' @description This function pulls the akfin_area table from the AKFIN database using a web service.
+#' gap_taxonomic_classification
+#' @description This function pulls the akfin_taxonomics_groups table from the AKFIN database using a web service.
 
-get_gap_area<-function() {
+
+
+get_gap_taxonomic_groups<-function() {
+
   start_time <- Sys.time()
 
   if(!exists("token")) {
     message("Please create a valid Oauth token, e.g. token <- create_token('your_token.txt')")
   }
 
-  url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_area?"
+  url <- "https://apex.psmfc.org/akfin/data_marts/gap_products/gap_taxonomic_groups?"
 
   response <- httr::GET(url=url,
                         httr::add_headers(Authorization = token))
@@ -29,8 +32,3 @@ get_gap_area<-function() {
   return(data)
 
 }
-
-
-
-
-
