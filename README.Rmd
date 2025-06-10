@@ -27,8 +27,9 @@ This pacakge provides functions to download [gap_product](https://afsc-gap-produ
 
 In order to use this package you must be authorized to view these data.
 Please contact matt.callahan@noaa.gov for assistance setting up web service credentials.
-Authorized users will be issued a secret text string in a .txt file, which is encrypted using the create_token() function.
-The create_token function accepts a filepath to the textfile or a keyring package service input.
+Authorized users will be issued a secret text string in a .txt file, which will be in the format of 1234r..:abcd2.. 
+The create_token function encrypts this secret string to authenticate access to these data.
+The create_token function accepts a defined variable as the secret string, the filepath to the textfile, or a keyring package service input.
 This token is valid for about ten minutes. If it expires you will get an error asking you to provide a valid token.
 You must define the function output as token as in the example below. 
 
@@ -36,6 +37,7 @@ You must define the function output as token as in the example below.
 library(akfingapdata)
 library(tidyverse)
 library(keyring)
+library(kableExtra)
 
 token<-create_token("akfin_secret") # keyring input
 # token<-create_token("Callahan_token.txt") file version
@@ -47,13 +49,14 @@ The authors of these tables mercifully named columns in such a way that no colum
 
 ```{r message = FALSE}
 metadata<-get_gap_metadata_column()
+head(metadata %>% dplyr::select(metadata_colname,metadata_colname_long, metadata_units)) %>%kable()
 
 ```
 
 ## Lookup tables
 
 Some functions require survey_definition_id, species_code, area_id, start_year, and end_year as parameters.  
-In order to correctly define these parameters, first download several lookup tables. 
+In order to correctly define these parameters, first download the species lookup table. 
 
 ```{r }
 # download species_code
@@ -61,64 +64,88 @@ In order to correctly define these parameters, first download several lookup tab
 taxa<- get_gap_taxonomic_groups()
 
 # find species codes for shortraker rockfish
- taxa %>% filter(grepl("shortraker", tolower(common_name)))
+ taxa %>% filter(grepl("shortraker", tolower(common_name))) %>%
+   dplyr::select(group_code, species_code, species_name, common_name) %>% kable()
 ```
+The GAP_PRODUCTS data structure uses the survey_definition_id column to specify which survey (region) data belong to. 
 
 ```{r}
-# download survey, area, and stratum group tables
-survey<-get_gap_survey_design()
-area<-get_gap_area()
-stratum<-get_gap_stratum_groups()
+# The survey name can be found in the cruise table.
+cruise <- get_gap_cruise()
 
-#combine spatial lookup tables
-stratum<-stratum %>%
-  left_join(survey %>%
-              # remove year specific information from survey, we only need the region codes
-              group_by(survey_definition_id) %>%
-              summarize(survey_definition_id=max(survey_definition_id)), 
-            by="survey_definition_id") %>%
-  left_join(area,  by=c("area_id"="area_id", "survey_definition_id"="survey_definition_id", "design_year"="design_year"))
-              # I get a many to one here that gives me two extra rows
-
-# Look for the western Gulf
-# 805
-stratum %>%
-  filter(survey_definition_id=="GOA",
-         area_type=="REGULATORY AREA",
-         grepl("western", tolower(area_name))
-         )
+cruise %>%
+  group_by(survey_definition_id) %>% 
+  summarize(survey_name = unique(survey_name)) %>% kable()
 ```
+
+The design_year field notes the year of survey design. Biomass, agecomp, and sizecomp estimates are provided for one design year only. As of summer 2025, for all surveys except the GOA, indices use the most recent survey design year. The GOA survey design changed in 2025 and old estimates were not recalculated with the new design, therefore in the GOA 1990-2023 use the 2024 design year and 2025 onward use the 2025 design year. 
+
+```{r}
+# download survey design
+survey_design<-get_gap_survey_design()
+
+survey_design %>% 
+  group_by(survey_definition_id) %>%
+  reframe(design_year = unique(design_year)) %>% kable()
+  
+```
+
+
+The get_gap_area() function provides the akfin_area table, which contains area_id descriptions. Biomass, sizecomp, and agecomp estimates are provided at the area_id level. Determining the correct area_id is one crux to replicate results from pre-gap_products tables. Area_ids are grouped by area types e.g "REGION", "REGULATORY AREA", "STRATUM". The akfin_area table has records for each design_year, so if joining the area descriptions to biomass estimates, design_year needs to be specified to avoid duplicates. 
+
+```{r}
+area <- get_gap_area()
+
+unique(area$area_type)
+```
+
+The get_gap_stratum_groups() function shows which strata are in each AREA_ID (for non "STRATUM" area_ids).
+```{r}
+stratum_groups <- get_gap_stratum_groups()
+
+# which stata are in the Western GOA?
+area %>%
+  filter(design_year ==2025,
+         survey_definition_id==47,
+         area_type=="REGULATORY AREA",
+         area_name == "Western GOA"
+         ) %>%
+  dplyr::select(area_id)
+
+stratum_groups %>%
+  filter(design_year == 2025,,
+         survey_definition_id==47,
+         area_id == 805) %>% kable()
+```
+
 
 ## Data tables
 Each table has a separate function to pull data from it.
 Agecomp, Biomass, Catch, CPUE, Length, Sizecomp, and Specimen tables have hundreds of thousands to over 100 million rows.
 Parameters are built into the web services and functions to prevent enormous downloads.
-Default parameters are as follows: survey_definition_id= 98 (Bering Sea), area_id = 1 (EBS Subarea 1), species_code=21740 (Pollock), start_year = 1990, and end_year = 3000 (will need to get updated in 976 years).
+Default parameters are as follows: survey_definition_id= 98 (Bering Sea), area_id = 1 (EBS Subarea 1), species_code=21740 (Pollock), start_year = 1990, and end_year = 3000.
 Agecomp, biomass, and sizecomp are calculated at the area_id level and survey_definition_id and area_id are built into those tables.
 
 ```{r}
-# Get Western GOA shortraker, agecomp, biomass from 2010 onward
-
+# Get GOA shortraker, agecomp, biomass, and sizecomp data 
 goasr_biomass<-get_gap_biomass(survey_definition_id = 47,
-                area_id = 805,
+                area_id = 99903,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
 
 goasr_sizecomp<-get_gap_sizecomp(survey_definition_id = 47,
-                area_id = 805,
+                area_id = 99903,
                 species_code = 30576,
                 start_year=1990,
                 end_year=2023)
 
-head(goasr_sizecomp)
 
-# Gap only provides agecomps at strata and regional, not subregional, levels so I will run this gulf-wide. 
 head(get_gap_agecomp(survey_definition_id = 47,
                 area_id = 99903,
                 species_code = 30576,
                 start_year=1990,
-                end_year=2023))
+                end_year=2023))%>% kable()
 
 ```
 
@@ -138,7 +165,7 @@ Catch, CPUE, Length, and Specimen tables contain haul level data.
 The web service joins the haul and cruises tables to allow querying by survey.
 
 ```{r}
-# Get catch, cpue, length frequency, and specimens at a haul level for Western GOA shortraker
+# Get catch, cpue, length frequency, and specimens at a haul level for GOA shortraker
 
 # The catch table only includes records where the species were caught
 goasr_catch<-get_gap_catch(survey_definition_id = 47,
@@ -152,11 +179,7 @@ goasr_cpue<-get_gap_cpue(survey_definition_id = 47,
                 start_year=1990,
                 end_year=2023)
 
-# The length table has ~150 million rows as of 2023. 
-# Even with filters it may load a large amount of data
-# For WGOA shortraker below it pulled 40367 records. 
-# Add timing to track how long this takes
-
+# The length table has ~4 million rows as of 2025 so loads may be slow. 
 goasr_length<-get_gap_length(survey_definition_id = 47,
                 species_code = 30576,
                 start_year=1990,

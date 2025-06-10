@@ -1,17 +1,18 @@
 #' create_token
 #' @description This function creates a token necessary for web service authentication
 #' The output must be defined as token for the other functions to work
-#' Define your authentication string or copy into the function
+#' Define your authentication string
 #' x<-"12345..:abcd.."
 #' token <- create_token(x)
 #' Otherwise, this function accepts keyring and text file input
+#' This function accepts keyring and text file input
 #' token<- create_token("akfin_secret") # keyring service storing secret string
 #' token<- create_token("Callahan_token.txt") # text file storing your secret string
 
 create_token<-function(x) {
 
   # Check if x exists in the global environment
-  if (is.character(x)) {
+  if (!is.character(x)) {
     secret <- jsonlite::base64_enc(x)
 
   #check key_list for input
@@ -36,4 +37,3 @@ create_token<-function(x) {
   paste("Bearer", httr::content(req)$access_token)
 
 }
-
