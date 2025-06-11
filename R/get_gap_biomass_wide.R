@@ -21,10 +21,10 @@ get_gap_biomass_wide <- function(survey_definition_id=98, area_id=99900, species
                              start_year=start_year,
                              end_year=end_year)
 
-  if(is.na(taxa)) {
+  if(missing(taxa)) {
   taxa <- get_gap_taxonomic_groups() |>
     dplyr::select(species_code, species_name, common_name)
-  }
+  } else { taxa<-taxa }
 
   area <-get_gap_area() |>
     dplyr::select(!akfin_load_date)
