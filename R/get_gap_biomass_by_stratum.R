@@ -19,13 +19,18 @@ get_gap_biomass_by_stratum <- function(survey_definition_id=98,  species_code=21
     dplyr::select(!akfin_load_date)
 
   # limit to most recent design year
-  regional_max_design_years <- area |>
-    dplyr::group_by(survey_definition_id) |>
-    dplyr::summarize(design_year=max(design_year))
+  # regional_max_design_years <- area |>
+  #   dplyr::group_by(survey_definition_id) |>
+  #   dplyr::summarize(design_year=max(design_year))
 
-  area2 <- regional_max_design_years |>
+  survey_design <- get_gap_survey_design() |>
+    dplyr::select(!akfin_load_date) |>
+    dplyr::group_by(survey_definition_id) |>
+    dplyr::distinct(design_year)
+
+  area2 <- survey_design |>
     dplyr::left_join(area, by=c("survey_definition_id"="survey_definition_id",
-                     "design_year"="design_year"))
+                                "design_year"="design_year"))
 
   # limit to specified survey
   area2 <- area2 |>
@@ -34,14 +39,6 @@ get_gap_biomass_by_stratum <- function(survey_definition_id=98,  species_code=21
   # define strata to run biomass function for
   my_strata <- (area2 |> dplyr::filter(area_type == "STRATUM"))$area_id
 
-  # load stratum group definitions
-  stratum_groups <- get_gap_stratum_groups()
-
-  # limit to most recent design year & specified survey
-  stratum_groups <- regional_max_design_years |>
-    dplyr::left_join(stratum_groups, by=c("survey_definition_id"="survey_definition_id",
-                                "design_year"="design_year"))
-
   stratum_groups <- stratum_groups |>
     dplyr::filter(survey_definition_id==!!survey_definition_id)
 
@@ -49,19 +46,19 @@ get_gap_biomass_by_stratum <- function(survey_definition_id=98,  species_code=21
   stratum_groups2 <- stratum_groups |>
     dplyr::inner_join(area2, by=c("survey_definition_id"="survey_definition_id",
                                   "design_year"="design_year",
-                          "area_id"="area_id"))
+                                  "area_id"="area_id"))
 
   # pivot
   stratum_groups3 <- stratum_groups2 |>
     dplyr::select(survey_definition_id, stratum, area_type, area_name) |>
-    tidyr::pivot_wider(id_cols = c(survey_definition_id,stratum), names_from = area_type, values_from = area_name)
+    suppressWarnings(tidyr::pivot_wider(id_cols = c(survey_definition_id,stratum), names_from = area_type, values_from = area_name))
 
 
   biomass <- lapply(my_strata, FUN=function(x) get_gap_biomass(survey_definition_id=survey_definition_id,
-                             area_id=x,
-                             species_code=species_code,
-                             start_year=start_year,
-                             end_year=end_year)) |>
+                                                               area_id=x,
+                                                               species_code=species_code,
+                                                               start_year=start_year,
+                                                               end_year=end_year)) |>
     dplyr::bind_rows()
 
 
@@ -69,15 +66,14 @@ get_gap_biomass_by_stratum <- function(survey_definition_id=98,  species_code=21
 
 
   if(missing(taxa)) {
-  taxa <- get_gap_taxonomic_groups() |>
-    dplyr::select(species_code, species_name, common_name)
+    taxa <- get_gap_taxonomic_groups() |>
+      dplyr::select(species_code, species_name, common_name)
   } else { taxa<-taxa }
 
   biomass <- biomass |>
     dplyr::left_join(taxa, by="species_code") |>
     dplyr::left_join(stratum_groups3, by=c("survey_definition_id"="survey_definition_id",
-                                  "area_id"="stratum"))
+                                           "area_id"="stratum"))
 
   return(biomass)
 }
-
