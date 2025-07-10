@@ -1,8 +1,8 @@
-#' get_stratum_area_assignments
+#' get_gap_stratum_area_assignments
 
 
 
-get_stratum_area_assignments <- function() {
+get_gap_stratum_area_assignments <- function() {
 
   # load area
   area <-get_gap_area() |>
