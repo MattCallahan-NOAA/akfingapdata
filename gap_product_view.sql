@@ -1,3 +1,7 @@
+
+
+
+--BIOMASS
 CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_BIOMASS_V" AS
 SELECT            SV.SURVEY_NAME,
            SV.SURVEY_DEFINITION_ID,
@@ -34,7 +38,9 @@ POPULATION_VAR,
            SAA.NMFS_STATISTICAL_AREA,
            SAA.REGULATORY_AREA_BY_DEPTH,
            SAA.SUBAREA,           
-           B.akfin_load_date as akfin_load_date
+           B.akfin_load_date as akfin_load_date,
+           T.species_code || ' - ' || coalesce(T.common_name,T.species_name) as code_name,
+           CF.stock
       --NULL AS MIN_STRATUM_POPULATION, /*deprecated*/
       --NULL AS MAX_STRATUM_POPULATION /*deprecated*/
       FROM GAP_PRODUCTS.AKFIN_BIOMASS  B
@@ -54,9 +60,11 @@ POPULATION_VAR,
            left join STRATUM_AREA_ASSIGNMENTS SAA
                 ON SAA.SURVEY_DEFINITION_ID=B.SURVEY_DEFINITION_ID
                 AND B.AREA_ID = SAA.STRATUM
-                AND S.DESIGN_YEAR = SAA.DESIGN_YEAR;
+                AND S.DESIGN_YEAR = SAA.DESIGN_YEAR
+         left join stock_species_code CF
+                ON B.species_code = CF.species_code;
 
-
+--SIZECOMP
 CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_SIZECOMP_V" AS
   SELECT 
            SV.SURVEY_NAME,
@@ -85,7 +93,9 @@ CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_SIZECOMP_V" AS
            SAA.NMFS_STATISTICAL_AREA,
            SAA.REGULATORY_AREA_BY_DEPTH,
            SAA.SUBAREA,           
-           SC.akfin_load_date as akfin_load_date
+           SC.akfin_load_date as akfin_load_date,
+           T.species_code || ' - ' || coalesce(T.common_name,T.species_name) as code_name,
+           CF.stock
       --NULL AS MIN_STRATUM_POPULATION, /*deprecated*/
       --NULL AS MAX_STRATUM_POPULATION /*deprecated*/
       FROM GAP_PRODUCTS.AKFIN_SIZECOMP  SC
@@ -106,11 +116,14 @@ CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_SIZECOMP_V" AS
                 ON SAA.SURVEY_DEFINITION_ID=SC.SURVEY_DEFINITION_ID
                 AND SC.AREA_ID = SAA.STRATUM
                 AND S.DESIGN_YEAR = SAA.DESIGN_YEAR
+            left join stock_species_code CF
+                ON SC.species_code = CF.species_code
 ;
 
 SELECT COUNT(*) FROM AKFIN_SIZECOMP; --3234183
 SELECT COUNT(*) FROM AKFIN_SIZECOMP_V; --3234183
 
+--AGECOMP
 CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_AGECOMP_V" AS
   SELECT 
            SV.SURVEY_NAME,
@@ -142,7 +155,9 @@ CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_AGECOMP_V" AS
            SAA.NMFS_STATISTICAL_AREA,
            SAA.REGULATORY_AREA_BY_DEPTH,
            SAA.SUBAREA,           
-           AC.akfin_load_Date as akfin_load_date
+           AC.akfin_load_Date as akfin_load_date,
+           T.species_code || ' - ' || coalesce(T.common_name,T.species_name) as code_name,
+           CF.stock
       --NULL AS MIN_STRATUM_POPULATION, /*deprecated*/
       --NULL AS MAX_STRATUM_POPULATION /*deprecated*/
       FROM GAP_PRODUCTS.AKFIN_AGECOMP  AC
@@ -163,16 +178,14 @@ CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_AGECOMP_V" AS
                 ON SAA.SURVEY_DEFINITION_ID=AC.SURVEY_DEFINITION_ID
                 AND AC.AREA_ID = SAA.STRATUM
                 AND S.DESIGN_YEAR = SAA.DESIGN_YEAR
+            left join stock_species_code CF
+                ON AC.species_code = CF.species_code
 ;
 
 SELECT COUNT(*) FROM AKFIN_AGECOMP; --680450
 SELECT COUNT(*) FROM AKFIN_AGECOMP_V; --680450
 
-SELECT COLUMN_NAME
-  FROM all_tab_cols
- WHERE table_name = 'AKFIN_HAUL'
- and owner = 'GAP_PRODUCTS';
- 
+--HAUL 
   CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_HAUL_V" AS
         SELECT 
             C.YEAR,
@@ -205,7 +218,8 @@ SELECT COLUMN_NAME
 
         SELECT COUNT(*) FROM GAP_PRODUCTS.AKFIN_HAUL; --34193
         SELECT COUNT(*) FROM GAP_PRODUCTS.AKFIN_HAUL_V; --
-        
+
+--CATCH        
  CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_CATCH_V" AS
 SELECT  
 C.CATCHJOIN,
@@ -214,16 +228,21 @@ C.WEIGHT_KG,
 C.COUNT,
 T.COMMON_NAME,
 T.SPECIES_NAME,
-H.*
+H.*,
+T.species_code || ' - ' || coalesce(T.common_name,T.species_name) as code_name,
+CF.stock
 FROM AKFIN_CATCH C
  left join (select distinct species_code, species_name, common_name from gap_products.akfin_taxonomic_groups) t
                ON C.SPECIES_CODE = T.SPECIES_CODE
  LEFT JOIN AKFIN_HAUL_V H
- ON C.HAULJOIN=H.HAULJOIN;
+ ON C.HAULJOIN=H.HAULJOIN
+ left join stock_species_code CF
+                ON C.species_code = CF.species_code;
  
          SELECT COUNT(*) FROM GAP_PRODUCTS.AKFIN_CATCH; --971788
         SELECT COUNT(*) FROM GAP_PRODUCTS.AKFIN_CATCH_V; --971788
-        
+
+--CPUE        
          CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_CPUE_V" AS
 SELECT  
 C.SPECIES_CODE,
@@ -234,16 +253,21 @@ C.CPUE_KGKM2,
 C.CPUE_NOKM2,
 T.COMMON_NAME,
 T.SPECIES_NAME,
-H.*
+H.*,
+T.species_code || ' - ' || coalesce(T.common_name,T.species_name) as code_name,
+CF.stock
 FROM AKFIN_CPUE C
  left join (select distinct species_code, species_name, common_name from gap_products.akfin_taxonomic_groups) t
                ON C.SPECIES_CODE = T.SPECIES_CODE
  LEFT JOIN AKFIN_HAUL_V H
- ON C.HAULJOIN=H.HAULJOIN;
+ ON C.HAULJOIN=H.HAULJOIN
+ left join stock_species_code CF
+                ON C.species_code = CF.species_code;
  
           SELECT COUNT(*) FROM GAP_PRODUCTS.AKFIN_CPUE; --21281100
         SELECT COUNT(*) FROM GAP_PRODUCTS.AKFIN_CPUE_V; --21281100
 
+--LENGTH
  CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_LENGTH_V" AS
 SELECT         
 C.SPECIES_CODE,
@@ -254,17 +278,22 @@ C.LENGTH_TYPE,
 C.SAMPLE_TYPE,
 T.COMMON_NAME,
 T.SPECIES_NAME,
-H.*
+H.*,
+T.species_code || ' - ' || coalesce(T.common_name,T.species_name) as code_name,
+CF.stock
 FROM AKFIN_LENGTH C
  left join (select distinct species_code, species_name, common_name from gap_products.akfin_taxonomic_groups) t
                ON C.SPECIES_CODE = T.SPECIES_CODE
  LEFT JOIN AKFIN_HAUL_V H
- ON C.HAULJOIN=H.HAULJOIN;
+ ON C.HAULJOIN=H.HAULJOIN
+  left join stock_species_code CF
+                ON C.species_code = CF.species_code;
 
 
         SELECT COUNT(*) FROM GAP_PRODUCTS.AKFIN_LENGTH; --4448213
         SELECT COUNT(*) FROM GAP_PRODUCTS.AKFIN_LENGTH_V; --4448213
-        
+ 
+ --SPECIMEN       
          CREATE OR REPLACE VIEW "GAP_PRODUCTS"."AKFIN_SPECIMEN_V" AS
 SELECT  
 C.SPECIMEN_ID,
@@ -280,35 +309,24 @@ C.SPECIMEN_SAMPLE_TYPE,
 C.AGE_DETERMINATION_METHOD,
 T.COMMON_NAME,
 T.SPECIES_NAME,
-H.*
+H.*,
+T.species_code || ' - ' || coalesce(T.common_name,T.species_name) as code_name,
+CF.stock
 FROM AKFIN_SPECIMEN C
  left join (select distinct species_code, species_name, common_name from gap_products.akfin_taxonomic_groups) t
                ON C.SPECIES_CODE = T.SPECIES_CODE
  LEFT JOIN AKFIN_HAUL_V H
- ON C.HAULJOIN=H.HAULJOIN;
+ ON C.HAULJOIN=H.HAULJOIN
+  left join stock_species_code CF
+                ON C.species_code = CF.species_code;
  
          SELECT COUNT(*) FROM GAP_PRODUCTS.AKFIN_SPECIMEN_V; --588066
          SELECT COUNT(*) FROM GAP_PRODUCTS.AKFIN_SPECIMEN;
-         
-         --some poking around
-select distinct(area_id) from akfin_agecomp where survey_definition_id = 98;
 
-select * from akfin_sizecomp_v;
+--Backup of pivot table uploaded in R
+--create table stratum_area_assignments_bu as select * from stratum_area_assignments;
 
-select * from akfin_SIZECOMP_v
-where year=2024
-and survey_definition_id=52
-and species_code = 21740
-and area_type='DEPTH'
-;
-
-SELECT DISTINCT(AREA_TYPE), SURVEY_DEFINITION_ID FROM AKFIN_AREA ORDER BY SURVEY_DEFINITION_ID;
-
-create table stratum_area_assignments_bu as select * from stratum_area_assignments;
-
--- function for pivoting stratum groups
--- Remove akfin_load_date from result columns
-drop view stratum_area_assignment_v;
+-- pivot of stratum groups
 
 create or replace view stratum_area_assignments as 
 WITH area AS (
@@ -380,4 +398,28 @@ SELECT
 FROM sa
 GROUP BY survey_definition_id, stratum, design_year
 ORDER BY survey_definition_id, stratum, design_year;
+
+--stock_species_v
+--create table stock_species_code as
+create or replace view stock_species_code_v as
+select distinct(race_code) species_code, race_name species_name, 1 as stock from akfin_marts.draft_species_code_lookup
+where race_code is not null
+order by race_code;
+
+--run grants
+DECLARE
+  users SYS.ODCIVARCHAR2LIST := SYS.ODCIVARCHAR2LIST('ORDS_WEBSERVICE_USER', 'METADATA', 'AKFIN_REPORTS'); 
+BEGIN
+  FOR V IN (
+    SELECT view_name 
+    FROM all_views 
+    WHERE owner = 'GAP_PRODUCTS'
+  ) LOOP
+    FOR i IN 1 .. users.COUNT LOOP
+      EXECUTE IMMEDIATE 'GRANT SELECT ON GAP_PRODUCTS.' || v.view_name || ' TO ' || users(i);
+    END LOOP;
+  END LOOP;
+END;
+/
+
 commit;
